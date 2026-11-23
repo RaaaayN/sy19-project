@@ -1,7 +1,7 @@
 # PROGRESS : projet 3, fiabilité de l'heure de départ déclarée
 
-- [ ] 1. Données : heure déclarée vs réelle, taux de présence, choix et justification du seuil
-- [ ] 2. Cible binaire, déséquilibre des classes, découpage train/validation/test par date
+- [x] 1. Données : heure déclarée vs réelle, taux de présence, choix et justification du seuil
+- [x] 2. Cible binaire, déséquilibre des classes, découpage train/validation/test par date
 - [ ] 3. Baselines : classe majoritaire, taux historique de l'usager (passé seulement)
 - [ ] 4. Régression logistique, puis logistique L1 (glmnet, CV)
 - [ ] 5. LDA et QDA
