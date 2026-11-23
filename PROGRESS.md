@@ -7,8 +7,8 @@
 - [x] 5. PCA sur l'historique, régression sur composantes
 - [x] 6. GAM avec splines (heure, jour), effets partiels
 - [ ] 7. Arbre, bagging, random forest, importance des variables
-- [ ] 8. SVR à noyau RBF
-- [ ] 9. MLP avec early stopping
+- [x] 8. SVR à noyau RBF
+- [x] 9. MLP avec early stopping
 - [ ] 10. Tableau comparatif sur le test + investigation originale
 - [ ] 11. src/predict.R (predict_session) + exports pour le simulateur IA04
 - [ ] 12. rapport.md complet, projet.Rmd rendu en HTML, pull request
