@@ -3,7 +3,7 @@
 - [x] 1. Nettoyage et variables (src/features.R, historique usager sans fuite, découpage par date)
 - [x] 2. Analyse exploratoire et figures
 - [x] 3. Baselines : moyenne globale, moyenne par usager
-- [ ] 4. Régression linéaire, ridge, lasso (chemin de régularisation, variables retenues)
+- [x] 4. Régression linéaire, ridge, lasso (chemin de régularisation, variables retenues)
 - [ ] 5. PCA sur l'historique, régression sur composantes
 - [ ] 6. GAM avec splines (heure, jour), effets partiels
 - [ ] 7. Arbre, bagging, random forest, importance des variables
