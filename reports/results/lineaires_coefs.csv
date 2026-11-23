@@ -1,0 +1,115 @@
+"model","target","variable","coef_min","coef_1se"
+"Ridge","duration","(Intercept)",9.50689274983692,8.73918216557788
+"Ridge","duration","sitejpl",-0.189481965243813,-0.271208864730069
+"Ridge","duration","siteoffice001",0.0779786402784822,0.123912157555279
+"Ridge","duration","hour",-0.322273496275844,-0.258965694797013
+"Ridge","duration","dow",-0.0781948463355966,-0.0841157445913817
+"Ridge","duration","weekend",-1.04481761473987,-0.89400869188253
+"Ridge","duration","known",2.19444880581368,-0.493706492444447
+"Ridge","duration","has_hist",-7.03151760913682,-1.9606208344882
+"Ridge","duration","h_n",-0.0107648268403624,-0.119927835843253
+"Ridge","duration","h_dur_mean",0.627470072886509,0.352264225186321
+"Ridge","duration","h_dur_sd",0.111209559047653,0.240093048916842
+"Ridge","duration","h_kwh_mean",-0.0155811050133763,0.00813041318819917
+"Ridge","duration","h_kwh_sd",-0.0469361772368233,-0.0705508722963442
+"Ridge","duration","h_hour_mean",0.291415651489,0.0573755548006819
+"Ridge","duration","h_last_dur",0.0330432746743009,0.0863975269508764
+"Ridge","duration","h_last_kwh",0.00368415476211133,-0.000500598043500295
+"Ridge","duration","has_decl",-3.40770771186441,-1.46360501728927
+"Ridge","duration","decl_kwh",0.0065504252690684,0.00439044696741208
+"Ridge","duration","decl_dur",0.30992969533847,0.274558014390008
+"Lasso","duration","(Intercept)",9.50579105942462,8.62618524356074
+"Lasso","duration","sitejpl",-0.189568730202903,-0.164786037122228
+"Lasso","duration","siteoffice001",0.0776977084347413,0
+"Lasso","duration","hour",-0.322162274965295,-0.261324307254411
+"Lasso","duration","dow",-0.0781104036749062,-0.058955368347136
+"Lasso","duration","weekend",-1.04429087856043,-0.775792374764115
+"Lasso","duration","known",2.14654063121277,0
+"Lasso","duration","has_hist",-7.01900546197519,-3.30252463027949
+"Lasso","duration","h_n",-0.0107072194745214,-0.0340869058554125
+"Lasso","duration","h_dur_mean",0.627374332378906,0.480163797919508
+"Lasso","duration","h_dur_sd",0.111296937523734,0.144748236808449
+"Lasso","duration","h_kwh_mean",-0.0153021535028404,0
+"Lasso","duration","h_kwh_sd",-0.0469929748386399,-0.0297304440724527
+"Lasso","duration","h_hour_mean",0.291039562316274,0.0805662836657811
+"Lasso","duration","h_last_dur",0.0330492166109116,0.0335610670861012
+"Lasso","duration","h_last_kwh",0.0036432634822303,0
+"Lasso","duration","has_decl",-3.367721672053,-1.40396131135467
+"Lasso","duration","decl_kwh",0.00647383487642037,0
+"Lasso","duration","decl_dur",0.309674336276194,0.265715715298733
+"Régression linéaire","duration","(Intercept)",9.50767513796273,NA
+"Régression linéaire","duration","sitejpl",-0.18944317882906,NA
+"Régression linéaire","duration","siteoffice001",0.0794216109855987,NA
+"Régression linéaire","duration","hour",-0.322477197800509,NA
+"Régression linéaire","duration","dow",-0.0781496563416077,NA
+"Régression linéaire","duration","weekend",-1.04525194747022,NA
+"Régression linéaire","duration","known",2.267615032651,NA
+"Régression linéaire","duration","has_hist",-7.0616706762654,NA
+"Régression linéaire","duration","h_n",-0.0103482741394208,NA
+"Régression linéaire","duration","h_dur_mean",0.628343266190901,NA
+"Régression linéaire","duration","h_dur_sd",0.110416501106098,NA
+"Régression linéaire","duration","h_kwh_mean",-0.0159921127035112,NA
+"Régression linéaire","duration","h_kwh_sd",-0.0466652337133117,NA
+"Régression linéaire","duration","h_hour_mean",0.292278539954563,NA
+"Régression linéaire","duration","h_last_dur",0.0329591846394899,NA
+"Régression linéaire","duration","h_last_kwh",0.0037653582818478,NA
+"Régression linéaire","duration","has_decl",-3.46300633548296,NA
+"Régression linéaire","duration","decl_kwh",0.00662691699450099,NA
+"Régression linéaire","duration","decl_dur",0.310007098051792,NA
+"Ridge","energy","(Intercept)",9.35314981410352,9.16462648451836
+"Ridge","energy","sitejpl",0.0624906770406995,0.0832189898926231
+"Ridge","energy","siteoffice001",9.49941851341146,9.30767547923774
+"Ridge","energy","hour",-0.200355671381951,-0.178558569034659
+"Ridge","energy","dow",-0.185791642419783,-0.185264684630301
+"Ridge","energy","weekend",0.436970393808909,0.485759174785382
+"Ridge","energy","known",14.1253432403478,6.98937623072617
+"Ridge","energy","has_hist",-10.5748442443192,-7.30788520820929
+"Ridge","energy","h_n",-0.17000001916622,-0.288685502601297
+"Ridge","energy","h_dur_mean",-0.0618916689375932,-0.0592453092478396
+"Ridge","energy","h_dur_sd",0.137404695714063,0.148717906875004
+"Ridge","energy","h_kwh_mean",0.601365975965162,0.564707962568267
+"Ridge","energy","h_kwh_sd",0.0320387169629416,0.0803802989012048
+"Ridge","energy","h_hour_mean",0.215703217581611,0.129780491361231
+"Ridge","energy","h_last_dur",-0.0667635681026498,-0.0791438641695317
+"Ridge","energy","h_last_kwh",0.0394240379080851,0.063543045179521
+"Ridge","energy","has_decl",-13.527509399232,-7.97817978369624
+"Ridge","energy","decl_kwh",0.19771760787512,0.189962431583726
+"Ridge","energy","decl_dur",0.389652568655639,0.35211809239985
+"Lasso","energy","(Intercept)",9.35368462044423,8.7967059808746
+"Lasso","energy","sitejpl",0.0602256257594565,0
+"Lasso","energy","siteoffice001",9.50117964631163,9.03025290370125
+"Lasso","energy","hour",-0.200121287168411,-0.157052398037
+"Lasso","energy","dow",-0.185846830706865,-0.130196707856149
+"Lasso","energy","weekend",0.437757563904155,0.13402213319531
+"Lasso","energy","known",13.9616574419139,7.42030389325569
+"Lasso","energy","has_hist",-10.544388554927,-7.728255826502
+"Lasso","energy","h_n",-0.169940434672675,-0.202305023826975
+"Lasso","energy","h_dur_mean",-0.0616619463561622,-0.0484593888315726
+"Lasso","energy","h_dur_sd",0.137331945563768,0.0954866991072085
+"Lasso","energy","h_kwh_mean",0.602176037980807,0.615618132728981
+"Lasso","energy","h_kwh_sd",0.0320162218804539,0.0381118940144926
+"Lasso","energy","h_hour_mean",0.215578249877944,0.108467581494536
+"Lasso","energy","h_last_dur",-0.0663968833074716,-0.0537860289375258
+"Lasso","energy","h_last_kwh",0.0392971391847261,0.0360293256719893
+"Lasso","energy","has_decl",-13.3977568827712,-8.1252719139531
+"Lasso","energy","decl_kwh",0.197486459283919,0.191150497844345
+"Lasso","energy","decl_dur",0.389146149658253,0.323149764724131
+"Régression linéaire","energy","(Intercept)",9.34870834346205,NA
+"Régression linéaire","energy","sitejpl",0.0610334781914555,NA
+"Régression linéaire","energy","siteoffice001",9.50265397712555,NA
+"Régression linéaire","energy","hour",-0.200256272138023,NA
+"Régression linéaire","energy","dow",-0.185712067604063,NA
+"Régression linéaire","energy","weekend",0.437130259247687,NA
+"Régression linéaire","energy","known",14.2533389161514,NA
+"Régression linéaire","energy","has_hist",-10.5744598491508,NA
+"Régression linéaire","energy","h_n",-0.16987771201617,NA
+"Régression linéaire","energy","h_dur_mean",-0.0619388400205042,NA
+"Régression linéaire","energy","h_dur_sd",0.137163976978197,NA
+"Régression linéaire","energy","h_kwh_mean",0.600798704539726,NA
+"Régression linéaire","energy","h_kwh_sd",0.0321890101129732,NA
+"Régression linéaire","energy","h_hour_mean",0.215528585054607,NA
+"Régression linéaire","energy","h_last_dur",-0.0668390786893543,NA
+"Régression linéaire","energy","h_last_kwh",0.0394325190270453,NA
+"Régression linéaire","energy","has_decl",-13.6488701405608,NA
+"Régression linéaire","energy","decl_kwh",0.197902919796896,NA
+"Régression linéaire","energy","decl_dur",0.389962098897741,NA
