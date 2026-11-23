@@ -1,7 +1,7 @@
 # Projet 1 : prédiction de la durée et de l'énergie à l'arrivée
 
 - [x] 1. Nettoyage et variables (src/features.R, historique usager sans fuite, découpage par date)
-- [ ] 2. Analyse exploratoire et figures
+- [x] 2. Analyse exploratoire et figures
 - [ ] 3. Baselines : moyenne globale, moyenne par usager
 - [ ] 4. Régression linéaire, ridge, lasso (chemin de régularisation, variables retenues)
 - [ ] 5. PCA sur l'historique, régression sur composantes
