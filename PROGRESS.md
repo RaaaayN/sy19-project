@@ -6,7 +6,7 @@
 - [x] 4. Régression logistique, puis logistique L1 (glmnet, CV)
 - [x] 5. LDA et QDA
 - [x] 6. GAM logistique avec splines sur l'heure (mgcv)
-- [ ] 7. Arbre, bagging, random forest
+- [x] 7. Arbre, bagging, random forest
 - [ ] 8. SVM linéaire et RBF (C, gamma par CV)
 - [ ] 9. MLP (torch ou nnet)
 - [ ] 10. Comparaison (AUC, F1, confusion, ROC, calibration) et investigation originale
