@@ -10,5 +10,5 @@
 - [x] 8. SVR à noyau RBF
 - [x] 9. MLP avec early stopping
 - [x] 10. Tableau comparatif sur le test + investigation originale
-- [ ] 11. src/predict.R (predict_session) + exports pour le simulateur IA04
+- [x] 11. src/predict.R (predict_session) + exports pour le simulateur IA04
 - [ ] 12. rapport.md complet, projet.Rmd rendu en HTML, pull request
