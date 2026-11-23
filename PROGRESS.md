@@ -12,4 +12,4 @@
 - [x] 10. Générateur d'agents (GMM par profil), export JSON pour Go, test KS
 - [x] 11. rapport.md complet (tableau comparatif, limites, lien IA04)
 - [x] 12. projet.Rmd rendu en HTML
-- [ ] 13. Pull request vers main
+- [x] 13. Pull request vers main
