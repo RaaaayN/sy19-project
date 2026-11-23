@@ -2,7 +2,7 @@
 
 - [x] 1. Données : heure déclarée vs réelle, taux de présence, choix et justification du seuil
 - [x] 2. Cible binaire, déséquilibre des classes, découpage train/validation/test par date
-- [ ] 3. Baselines : classe majoritaire, taux historique de l'usager (passé seulement)
+- [x] 3. Baselines : classe majoritaire, taux historique de l'usager (passé seulement)
 - [ ] 4. Régression logistique, puis logistique L1 (glmnet, CV)
 - [ ] 5. LDA et QDA
 - [ ] 6. GAM logistique avec splines sur l'heure (mgcv)
