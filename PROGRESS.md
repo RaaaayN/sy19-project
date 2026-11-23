@@ -9,6 +9,6 @@
 - [x] 7. Arbre, bagging, random forest, importance des variables
 - [x] 8. SVR à noyau RBF
 - [x] 9. MLP avec early stopping
-- [ ] 10. Tableau comparatif sur le test + investigation originale
+- [x] 10. Tableau comparatif sur le test + investigation originale
 - [ ] 11. src/predict.R (predict_session) + exports pour le simulateur IA04
 - [ ] 12. rapport.md complet, projet.Rmd rendu en HTML, pull request
