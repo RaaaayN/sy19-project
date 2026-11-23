@@ -7,7 +7,7 @@
 - [x] 5. LDA et QDA
 - [x] 6. GAM logistique avec splines sur l'heure (mgcv)
 - [x] 7. Arbre, bagging, random forest
-- [ ] 8. SVM linéaire et RBF (C, gamma par CV)
+- [x] 8. SVM linéaire et RBF (C, gamma par CV)
 - [x] 9. MLP (torch ou nnet)
 - [ ] 10. Comparaison (AUC, F1, confusion, ROC, calibration) et investigation originale
 - [ ] 11. Module src/depart_risk.R + export CSV/JSON pour le simulateur Go (IA04)
