@@ -36,11 +36,13 @@ user_features <- function(s, min_sessions = MIN_SESSIONS) {
       kwh_med = median(kWhDelivered), kwh_cv = sd(kWhDelivered) / mean(kWhDelivered),
       span_w = max(1, as.numeric(max(day) - min(day)) / 7),
       freq_week = n / span_w,
-      reg_weeks = n_distinct(floor_date(day, "week")) / ceiling(span_w),
-      frac_weekend = mean(weekend),
+      # Proportions lissées (+0,5 / +1) : évite les valeurs exactement 0 ou 1 (55 % des usagers
+      # n'ont aucune session le week-end), qui rendent les covariances des GMM singulières
+      reg_weeks = (n_distinct(floor_date(day, "week")) + 0.5) / (ceiling(span_w) + 1),
+      frac_weekend = (sum(weekend) + 0.5) / (n + 1),
       first = min(day), last = max(day),
       .groups = "drop") %>%
-    mutate(reg_weeks = pmin(reg_weeks, 1))
+    mutate(reg_weeks = pmin(reg_weeks, 1 - 0.5 / (ceiling(span_w) + 1)))
 }
 
 # Séparation train/test par usagers (20 % des usagers mis de côté, jamais vus à l'apprentissage)
@@ -55,7 +57,7 @@ clust_matrix <- function(u, center = NULL, scale = NULL) {
   x <- as.matrix(u[, CLUST_VARS])
   x[, c("kwh_med", "freq_week", "dur_med")] <- log(x[, c("kwh_med", "freq_week", "dur_med")])
   x[, "kwh_cv"] <- log1p(x[, "kwh_cv"])
-  x[, "frac_weekend"] <- sqrt(x[, "frac_weekend"])
+  x[, c("reg_weeks", "frac_weekend")] <- qlogis(x[, c("reg_weeks", "frac_weekend")])
   if (is.null(center)) { center <- colMeans(x); scale <- apply(x, 2, sd) }
   z <- sweep(sweep(x, 2, center), 2, scale, "/")
   attr(z, "center") <- center; attr(z, "scl") <- scale
