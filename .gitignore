@@ -1,0 +1,12 @@
+data/
+.Renviron
+.env
+.Rhistory
+.RData
+.Rproj.user/
+*_cache/
+*_files/
+*.pt
+__pycache__/
+.venv/
+.DS_Store
