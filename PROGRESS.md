@@ -10,6 +10,6 @@
 - [x] 8. One-class SVM pour les usagers atypiques
 - [x] 9. Investigation originale : sensibilité au seuil minimal de sessions et stabilité entre périodes
 - [x] 10. Générateur d'agents (GMM par profil), export JSON pour Go, test KS
-- [ ] 11. rapport.md complet (tableau comparatif, limites, lien IA04)
+- [x] 11. rapport.md complet (tableau comparatif, limites, lien IA04)
 - [ ] 12. projet.Rmd rendu en HTML
 - [ ] 13. Pull request vers main
