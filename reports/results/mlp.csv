@@ -1,0 +1,5 @@
+"model","target","split","MAE","RMSE","R2","param"
+"MLP (torch)","duration","val",1.52605409417958,2.25168465322885,0.594905316725719,"2x128 ReLU, dropout 0.2, 29 époques"
+"MLP (torch)","duration","test",1.60231835557315,2.42028066673936,0.549495270737805,"2x128 ReLU, dropout 0.2, 29 époques"
+"MLP (torch)","energy","val",3.90581863737207,5.98698463877567,0.705160122502292,"2x128 ReLU, dropout 0.2, 29 époques"
+"MLP (torch)","energy","test",4.04130821444798,6.15672429421424,0.695726267625363,"2x128 ReLU, dropout 0.2, 29 époques"
