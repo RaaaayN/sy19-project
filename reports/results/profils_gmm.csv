@@ -1,0 +1,7 @@
+"profil","jeu","usagers","part","sessions_med","arr_med","arr_sd","dep_med","dur_med","kwh_med","kwh_cv","freq_week","reg_weeks","frac_weekend","part_caltech"
+"Pendulaire régulier","train",131,0.35,74,7.34,1.31,16.73,9.32,12.9,0.28,1.95,0.79,0.01,0.26
+"Pendulaire flexible","train",147,0.39,43,10.45,2.75,17.17,5.24,10.56,0.44,0.99,0.62,0.03,0.33
+"Visiteur irrégulier","train",95,0.25,35,13.08,2.99,17.96,4.25,9.41,0.36,1.04,0.59,0.12,0.61
+"Pendulaire régulier","test",36,0.39,87.5,7.39,1.34,16.95,9.43,11.5,0.32,2.12,0.86,0.01,0.22
+"Pendulaire flexible","test",30,0.32,40,11.88,2.65,17.07,4.68,9.94,0.45,1.21,0.71,0.04,0.33
+"Visiteur irrégulier","test",27,0.29,38,13.83,3.34,17.68,3.29,9.97,0.44,0.78,0.44,0.2,0.7
