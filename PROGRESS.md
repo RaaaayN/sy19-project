@@ -12,4 +12,4 @@
 - [x] 10. Comparaison (AUC, F1, confusion, ROC, calibration) et investigation originale
 - [x] 11. Module src/depart_risk.R + export CSV/JSON pour le simulateur Go (IA04)
 - [x] 12. Rapport (reports/rapport.md), notebook reports/projet.Rmd rendu en HTML
-- [ ] 13. Pull request vers main
+- [x] 13. Pull request vers main
