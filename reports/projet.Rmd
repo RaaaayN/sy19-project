@@ -1,0 +1,154 @@
+---
+title: "SY19, projet 3 : fiabilité de l'heure de départ déclarée (ACN-Data)"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    self_contained: true
+---
+
+```{r setup, include = FALSE}
+knitr::opts_knit$set(root.dir = normalizePath(".."))
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.align = "center")
+```
+
+Ce notebook relit les résultats produits par les scripts de `src/` (voir `reports/rapport.md` pour l'analyse
+détaillée et la commande de reproduction). Les modèles longs à ajuster (forêts, SVM, MLP) ne sont pas réentraînés
+ici : on lit leurs prédictions et métriques sauvegardées dans `reports/preds/` et `reports/metrics/`.
+
+```{r libs}
+suppressMessages({ library(dplyr); library(knitr) })
+source("src/p3_data.R")
+fig <- function(f) include_graphics(normalizePath(file.path("reports/figures", f)))
+rd  <- function(f) read.csv(file.path("reports/metrics", f))
+```
+
+# 1. Question
+
+À l'arrivée, l'usager déclare son heure de départ (`requestedDeparture`). Le simulateur IA04 (Go, LLF sous
+contrainte de puissance) s'en sert comme échéance. On prédit la probabilité qu'il parte **plus de 15 minutes
+avant** cette heure, pour savoir quand lui faire confiance.
+
+# 2. Données, cible, déséquilibre
+
+```{r donnees}
+kable(rd("p3_presence.csv"), digits = 3, caption = "Part des sessions avec userID et heure déclarée")
+x <- build_p3()
+cat(nrow(x), "sessions retenues,", length(unique(x$userID)), "usagers\n")
+kable(rd("p3_seuils.csv"), digits = 3, caption = "Taux de départ anticipé selon le seuil (min)")
+kable(rd("p3_classes.csv"), digits = 3, caption = "Découpage par date et taux de la classe positive")
+```
+
+Seuil retenu : 15 min (tolérance de planification, déclarations arrondies ; voir le rapport). Classe positive :
+un quart à un tiers des sessions, en hausse dans le temps.
+
+```{r fig-donnees, echo = FALSE, out.width = "80%"}
+fig("p3_ecart_depart.png"); fig("p3_taux_mensuel.png")
+```
+
+Variables (toutes connues à l'arrivée) : `r paste(P3_FEATURES, collapse = ", ")`. L'historique de l'usager
+n'utilise que ses sessions déjà terminées (`tests/test_p3_data.R`).
+
+```{r historique}
+x %>% group_by(split) %>% summarise(n_past_median = median(n_past), past_rate_moyen = mean(past_rate)) %>% kable(digits = 3)
+```
+
+# 3. Protocole
+
+Hyperparamètres par CV (ou OOB, REML, hold-out temporel) sur le train ; seuil de décision maximisant le F1 sur la
+validation (sept.-nov. 2019) ; résultats sur le test (déc. 2019 - fév. 2020) ; sélection sur l'AUC de validation.
+
+# 4. Modèles
+
+## Baselines, logistique, lasso
+```{r logit}
+kable(rd("p3_logit_coefs.csv"), digits = 3, caption = "Logistique (variables standardisées)")
+kable(rd("p3_lasso_coefs.csv"), digits = 3, caption = "Lasso : coefficients à lambda 1-SE et lambda min")
+```
+```{r fig-lasso, echo = FALSE, out.width = "70%"}
+fig("p3_lasso_chemin.png")
+```
+
+## GAM logistique
+```{r gam}
+kable(rd("p3_gam_termes.csv"), digits = 3, caption = "Termes lisses du GAM")
+```
+```{r fig-gam, echo = FALSE, out.width = "95%"}
+fig("p3_gam_effets.png")
+```
+
+## Arbres et forêts
+```{r rf}
+kable(rd("p3_rf_grille.csv"), digits = 4, caption = "Grille random forest / bagging (AUC out-of-bag, train)")
+```
+```{r fig-rf, echo = FALSE, out.width = "85%"}
+fig("p3_arbre.png"); fig("p3_rf_importance.png")
+```
+
+## SVM
+```{r svm}
+kable(rd("p3_svm_grille.csv"), digits = 4, caption = "AUC en CV 3 plis (8 000 sessions du train)")
+```
+
+## MLP (torch)
+```{r mlp}
+kable(rd("p3_mlp_grille.csv"), digits = 4, caption = "Hold-out = 20 % les plus récents du train")
+```
+```{r fig-mlp, echo = FALSE, out.width = "70%"}
+fig("p3_mlp_courbes.png")
+```
+
+# 5. Comparaison
+
+```{r comparaison}
+cmp <- rd("p3_comparaison.csv")
+kable(cmp[, c("modele", "auc_val", "auc_test", "auc_test_ic_bas", "auc_test_ic_haut", "f1_val", "f1_test",
+              "precision_test", "recall_test", "brier_test", "seuil")], digits = 3)
+kable(rd("p3_confusion_test.csv"), digits = 3, caption = "Matrices de confusion (test, seuil de validation)")
+readLines("reports/metrics/p3_selection.csv")
+```
+
+```{r fig-cmp, echo = FALSE, out.width = "75%"}
+fig("p3_auc_modeles.png"); fig("p3_roc_test.png"); fig("p3_calibration_test.png")
+```
+
+Modèles flexibles (MLP, forêt, GAM) > linéaires (logistique, lasso, LDA, SVM linéaire) > arbre seul, QDA >
+taux historique de l'usager. Tous sous-estiment le risque sur le test (dérive du taux de 25 % à 34 %).
+
+# 6. Investigation originale
+
+## Ancienneté de l'usager
+```{r anc}
+kable(rd("p3_invest_anciennete.csv"), digits = 3)
+kable(rd("p3_invest_rang_intra_usager.csv"), digits = 3, caption = "Même usager (>= 40 sessions), par rang de session")
+```
+```{r fig-anc, echo = FALSE, out.width = "70%"}
+fig("p3_invest_anciennete.png")
+```
+Les habitués sont plus fiables, y compris à l'intérieur d'un même usager ; les nouveaux usagers sont les moins
+fiables et les plus difficiles à prédire.
+
+## Rééquilibrage des classes
+```{r reeq}
+kable(rd("p3_invest_reequilibrage.csv"), digits = 3)
+```
+Le rééquilibrage ne change pas l'AUC, améliore le F1 seulement au seuil naïf 0,5 et dégrade la calibration :
+inutile ici dès que le seuil est choisi sur la validation.
+
+# 7. Module de risque pour IA04
+
+```{r risk}
+source("src/depart_risk.R")
+m <- .dr_model()
+cat("AUC test du GAM exporté :", round(m$auc_test, 3), " ; avance médiane si départ anticipé :",
+    round(m$avance_mediane_si_anticipe_min, 1), "min\n")
+ex <- data.frame(site = c("jpl", "jpl", "caltech"), arr_hour = c(8, 8, 13), dep_hour = c(17, 23, 18),
+                 dur_decl = c(9, 15, 5), weekend = c(0, 0, 1), n_past = c(80, 80, 0),
+                 past_rate = c(0.1, 0.1, m$prior$p0), past_gap = c(0.5, 0.5, 0))
+ex$p <- depart_risk(newdata = ex); ex$marge_llf_min <- marge_llf(ex$p)
+kable(ex, digits = 3)
+```
+
+Exports lisibles depuis Go : `reports/export/depart_risk_gam.json` (tables additives du GAM),
+`depart_risk_usagers.csv` (historique par usager), `depart_risk_creneaux.csv` (probabilités par créneau).
+Dans le LLF : échéance effective = heure déclarée - `marge_llf(p)`.
