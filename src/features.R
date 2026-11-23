@@ -66,7 +66,7 @@ clust_matrix <- function(u, center = NULL, scale = NULL) {
 
 # Charge le tableau d'usagers produit par ce script, avec la matrice standardisée train/test
 load_users <- function(f = "reports/results/users_features.csv") {
-  u <- read.csv(f, stringsAsFactors = FALSE)
+  u <- read.csv(f, stringsAsFactors = FALSE, colClasses = c(userID = "character"))
   tr <- u[u$split == "train", ]; te <- u[u$split == "test", ]
   ztr <- clust_matrix(tr)
   zte <- clust_matrix(te, attr(ztr, "center"), attr(ztr, "scl"))

@@ -12,3 +12,8 @@ test_that("variables par usager cohérentes et split sans fuite", {
   expect_false(isTRUE(all.equal(unname(colMeans(L$zte)), rep(0, length(CLUST_VARS)))))  # échelle du train
   expect_false(anyNA(L$ztr)); expect_false(anyNA(L$zte))
 })
+test_that("les userID du csv correspondent aux sessions", {
+  L <- load_users()
+  expect_type(L$u$userID, "character")
+  expect_true(all(L$u$userID %in% clean_sessions(load_acn())$userID))
+})
