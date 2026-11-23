@@ -1,7 +1,7 @@
 # PROGRESS — Projet 2 : profils d'usagers (non supervisé)
 
 - [x] 1. Variables par usager (seuil minimal de sessions justifié), séparation train/test par usagers
-- [ ] 2. Standardisation et PCA, figures 2D
+- [x] 2. Standardisation et PCA, figures 2D
 - [ ] 3. Baseline k-means, choix de k (coude, silhouette)
 - [ ] 4. GMM par EM codé à la main (R de base), comparé à mclust, choix de K par BIC/AIC
 - [ ] 5. Kernel k-means (kernlab::kkmeans)
