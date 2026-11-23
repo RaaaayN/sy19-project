@@ -4,7 +4,7 @@
 - [x] 2. Analyse exploratoire et figures
 - [x] 3. Baselines : moyenne globale, moyenne par usager
 - [x] 4. Régression linéaire, ridge, lasso (chemin de régularisation, variables retenues)
-- [ ] 5. PCA sur l'historique, régression sur composantes
+- [x] 5. PCA sur l'historique, régression sur composantes
 - [ ] 6. GAM avec splines (heure, jour), effets partiels
 - [ ] 7. Arbre, bagging, random forest, importance des variables
 - [ ] 8. SVR à noyau RBF
