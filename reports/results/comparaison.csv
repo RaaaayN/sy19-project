@@ -1,0 +1,4 @@
+"methode","K","critere_choix","sil_train","sil_test","ari_bootstrap","ari_avec_gmm"
+"k-means (baseline)",4,"coude + silhouette",0.195,0.198,0.742,0.216
+"GMM, EM maison",3,"BIC (= max. vraisemblance test)",0.094,0.08,0.516,1
+"kernel k-means",3,"silhouette sur grille sigma x k",0.17,0.177,0.549,0.272
