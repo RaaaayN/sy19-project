@@ -48,7 +48,7 @@ print(ex, digits = 3); write.csv(ex, "reports/results/explication_profils.csv", 
 cat("Coefficients LDA (variables brutes) :\n"); print(round(lda_fit$scaling, 3))
 cat("Importance des variables (arbre) :\n"); print(round(tree$variable.importance, 1))
 print(tree)
-png("reports/figures/arbre_profils.png", width = 1000, height = 650, res = 110)
+png("reports/figures/arbre_profils.png", width = 1500, height = 750, res = 110)
 plot(tree, uniform = TRUE, margin = 0.08); text(tree, use.n = TRUE, cex = 0.7, all = FALSE)
 title("Arbre de décision qui prédit le profil GMM")
 dev.off()
