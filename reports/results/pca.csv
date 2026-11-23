@@ -1,0 +1,5 @@
+"model","target","split","MAE","RMSE","R2","k"
+"Régression sur composantes (PCR)","duration","val",1.71882266229715,2.43224151338662,0.527333523862794,8
+"Régression sur composantes (PCR)","duration","test",1.7818217465921,2.52700967804078,0.508886693273526,8
+"Régression sur composantes (PCR)","energy","val",4.57177131289911,6.64086727061189,0.637239881773895,8
+"Régression sur composantes (PCR)","energy","test",4.6300162475832,6.71272274043402,0.638288372675531,8
