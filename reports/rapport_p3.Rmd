@@ -1,0 +1,180 @@
+---
+title: "Peut-on se fier à l'heure de départ annoncée ?"
+subtitle: "Prédire les départs anticipés des véhicules électriques (ACN-Data) — SY19, A26"
+date: "Novembre 2026"
+lang: fr
+output:
+  pdf_document:
+    latex_engine: xelatex
+    number_sections: true
+    fig_caption: true
+geometry: "left=1.8cm,right=1.8cm,top=1.6cm,bottom=1.8cm"
+fontsize: 10pt
+mainfont: "Helvetica Neue"
+colorlinks: true
+linkcolor: "black"
+urlcolor: "blue"
+header-includes:
+  - \usepackage{booktabs}
+  - \usepackage{float}
+  - \floatplacement{figure}{htbp}
+  - \setlength{\parskip}{3pt}
+  - \usepackage{titlesec}
+  - \titlespacing*{\section}{0pt}{8pt}{3pt}
+  - \titlespacing*{\subsection}{0pt}{6pt}{2pt}
+  - \usepackage{caption}
+  - \captionsetup{font=small,labelfont=bf,skip=2pt}
+  - \usepackage[most]{tcolorbox}
+  - \newtcolorbox{cle}{colback=gray!7,colframe=gray!40,boxrule=0.4pt,arc=1mm,left=4pt,right=4pt,top=2pt,bottom=2pt}
+---
+
+```{r setup, include = FALSE}
+# Rendu : Rscript -e 'rmarkdown::render("reports/rapport_p3.Rmd")' depuis la racine du worktree.
+# Les figures viennent de src/p3_figures_rapport.R ; tous les chiffres sont lus dans reports/metrics/.
+knitr::opts_knit$set(root.dir = normalizePath(".."))
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, fig.align = "center")
+```
+
+```{r donnees}
+m   <- function(f) read.csv(file.path("reports/metrics", f))
+fig <- function(f) knitr::include_graphics(normalizePath(file.path("reports/figures/rapport", f)))
+pc  <- function(x, d = 1) formatC(100 * x, format = "f", digits = d, decimal.mark = ",")
+nb  <- function(x, d = 3) formatC(x, format = "f", digits = d, decimal.mark = ",")
+ent <- function(x) formatC(x, format = "d", big.mark = " ")
+cmp <- m("p3_comparaison.csv"); cl <- m("p3_classes.csv"); pres <- m("p3_presence.csv")
+seu <- m("p3_seuils.csv"); anc <- m("p3_invest_anciennete.csv"); rang <- m("p3_invest_rang_intra_usager.csv")
+reeq <- m("p3_invest_reequilibrage.csv"); conf <- m("p3_confusion_test.csv"); sel <- m("p3_selection.csv")
+gj <- jsonlite::fromJSON("reports/export/depart_risk_gam.json")
+r <- function(k) cmp[cmp$modele == k, ]
+n_sess <- sum(cl$sessions)
+c_mlp <- conf[conf$modele == "mlp", ]
+```
+
+\vspace{-6pt}
+
+\begin{cle}
+\textbf{En bref.} Sur `r ent(n_sess)` sessions de recharge (Caltech et JPL, 2018--2020), l'usager part plus de 15 minutes avant l'heure qu'il a annoncée dans `r pc(seu$taux_anticipe[seu$seuil_min == 15])` \% des cas. Onze classifieurs du cours sont comparés sur une période de test postérieure à l'apprentissage. Les modèles flexibles (MLP, forêt aléatoire, GAM) atteignent une AUC de `r nb(r("gam")$auc_test)` à `r nb(r("mlp")$auc_test)`, contre `r nb(r("taux_usager")$auc_test)` pour la règle « taux passé de l'usager ». L'écart entre eux n'est pas significatif : c'est l'information disponible, pas l'algorithme, qui fixe le plafond. Notre investigation montre que les usagers deviennent plus fiables avec l'ancienneté, y compris pris individuellement. Le modèle sert à raccourcir l'échéance d'un ordonnanceur LLF.
+\end{cle}
+
+# Problème et données
+
+**Pourquoi c'est utile.** Un parking de recharge à puissance limitée doit répartir les kW entre les voitures branchées. L'ordonnanceur *Least Laxity First* (LLF), utilisé dans notre simulateur multi-agents (projet IA04), sert d'abord la voiture dont la *laxité* est la plus faible : temps restant avant l'échéance moins temps de charge nécessaire. L'échéance est l'heure de départ que l'usager déclare dans l'application. Si l'usager part plus tôt, la laxité était surestimée et la voiture repart moins chargée que promis. **Question : peut-on prédire, dès l'arrivée, qu'un usager partira avant l'heure annoncée ?**
+
+**Données.** ACN-Data (Caltech) est un jeu public de sessions de recharge réelles, interrogé par son API. Il couvre septembre 2018 -- février 2020 ; mars 2020 est exclu à cause du confinement. L'heure déclarée n'existe que si l'usager utilise l'application : `r pc(pres$avec_heure_declaree[pres$site=="caltech"])` \% des sessions à Caltech, `r pc(pres$avec_heure_declaree[pres$site=="jpl"])` \% à JPL et `r pc(pres$avec_heure_declaree[pres$site=="office001"])` \% sur le troisième site, que nous écartons. Il reste `r ent(n_sess)` sessions et 736 usagers. **Cible :** départ réel plus de 15 min avant l'heure déclarée. Le seuil retenu ignore les arrondis de saisie : à 0 min, `r pc(seu$taux_anticipe[seu$seuil_min==0])` \% des sessions seraient positives, et `r pc(seu$taux_anticipe[seu$seuil_min==60])` \% à 60 min. **Variables, toutes connues à l'arrivée :**
+
+- heures d'arrivée et de départ déclarée, durée déclarée, site, week-end ;
+- énergie demandée et consommation déclarée ;
+- historique de l'usager : nombre de sessions passées, taux lissé de départs anticipés passés, écart moyen passé.
+
+```{r fig1, fig.cap = "Le phénomène étudié. (a) Les départs anticipés (rouge) forment une longue queue : quand on part en avance, c'est souvent de plusieurs heures. (b) Le taux augmente à partir de l'automne 2019, ce qui crée une dérive entre l'apprentissage et le test.", out.width = "100%"}
+fig("fig1_probleme.png")
+```
+
+# Protocole expérimental
+
+- **Découpage temporel**, pour imiter l'usage réel où l'on prédit le futur à partir du passé : train (sept. 2018 -- août 2019, `r ent(cl$sessions[cl$split=="train"])` sessions), validation (sept. -- nov. 2019, `r ent(cl$sessions[cl$split=="val"])`), test (déc. 2019 -- fév. 2020, `r ent(cl$sessions[cl$split=="test"])`). La classe positive passe de `r pc(cl$taux_anticipe[cl$split=="train"])` \% à `r pc(cl$taux_anticipe[cl$split=="val"])` \% puis à `r pc(cl$taux_anticipe[cl$split=="test"])` \%.
+- **Pas de fuite.** L'historique d'un usager ne compte que ses sessions *déjà terminées* à l'arrivée, ce que vérifie un test automatique. Les variables connues seulement après le départ (heure de déconnexion, énergie livrée) sont exclues. La standardisation utilise les moyennes du train.
+- **Réglage des hyperparamètres sur le train seulement :**
+  - validation croisée à 10 plis pour le lasso et l'arbre ;
+  - erreur *out-of-bag* pour les forêts ;
+  - validation croisée à 3 plis sur 8 000 sessions pour les SVM ;
+  - REML pour le GAM ;
+  - les 20 % les plus récents du train pour le MLP.
+- **Choix du modèle et du seuil.** Le modèle est choisi sur l'AUC de validation. Le seuil de décision maximise le F1 en validation. Le test ne sert qu'à mesurer, avec un intervalle de confiance DeLong. Nous suivons aussi la **calibration** (score de Brier), parce que l'ordonnanceur utilise la probabilité elle-même.
+
+# Méthodes comparées et résultats
+
+Nous comparons onze modèles en trois familles, plus deux références :
+
+- **références :** classe majoritaire ; taux passé de l'usager, c'est-à-dire ce qu'un gestionnaire ferait sans modèle ;
+- **modèles linéaires :** régression logistique, lasso (L1), LDA, SVM linéaire, et SVM à noyau RBF, rangé ici parce que le noyau retenu par validation croisée est quasi linéaire ;
+- **modèles fragiles :** QDA, arbre CART élagué ;
+- **modèles flexibles :** GAM logistique avec splines cycliques sur les heures, bagging, forêt aléatoire, MLP (torch, 2 couches cachées).
+
+```{r fig2, fig.cap = "Comparaison sur la période de test. Les modèles se regroupent par famille plutôt que par algorithme. Les quatre modèles flexibles ont des intervalles de confiance qui se recouvrent, et ce sont aussi les mieux calibrés (Brier le plus bas).", out.width = "100%"}
+fig("fig2_comparaison.png")
+```
+
+```{r tab1}
+k <- c("taux_usager", "logistique", "gam", "random_forest", "mlp")
+t1 <- data.frame(Modèle = c("Taux historique usager", "Régression logistique", "GAM logistique", "Forêt aléatoire", "MLP (torch)"),
+                 `AUC val.` = nb(cmp$auc_val[match(k, cmp$modele)]),
+                 `AUC test [IC 95 %]` = sprintf("%s [%s ; %s]", nb(cmp$auc_test[match(k, cmp$modele)]),
+                                                nb(cmp$auc_test_ic_bas[match(k, cmp$modele)]), nb(cmp$auc_test_ic_haut[match(k, cmp$modele)])),
+                 F1 = nb(cmp$f1_test[match(k, cmp$modele)]), Précision = nb(cmp$precision_test[match(k, cmp$modele)]),
+                 Rappel = nb(cmp$recall_test[match(k, cmp$modele)]), Brier = nb(cmp$brier_test[match(k, cmp$modele)]),
+                 check.names = FALSE)
+knitr::kable(t1, format = "latex", booktabs = TRUE, align = "lcccccc",
+             caption = "Principaux modèles sur le test (seuil de décision fixé sur la validation).") |>
+  gsub(pattern = "\\\\begin\\{table\\}", replacement = "\\\\begin{table}[H]\\\\small")
+```
+
+**Lecture.**
+
+- **Linéaire contre flexible.** Les modèles linéaires plafonnent à `r nb(r("svm_lineaire")$auc_test)`. LDA, logistique et SVM linéaire sont indiscernables, ce qui est attendu puisque leurs frontières sont toutes linéaires.
+- **Le gain vient de la non-linéarité des horaires.** Le GAM gagne `r nb(r("gam")$auc_test - r("logistique")$auc_test)` d'AUC sur la logistique en assouplissant seulement la forme des effets.
+- **Les forêts.** Elles font aussi bien, et décorréler les arbres (forêt aléatoire avec `mtry` = 2) apporte plus que le bagging seul.
+- **Le SVM RBF.** Il ne dépasse pas le linéaire : la validation croisée a choisi un $\gamma$ très petit, c'est-à-dire un noyau presque linéaire.
+- **Le MLP.** Il est retenu sur la validation, mais son avance sur le GAM et la forêt reste dans l'intervalle de confiance. Il bat nettement la référence (DeLong, $p \approx 10^{-80}$).
+- **La QDA.** Ses probabilités sont écrasées vers 0 et 1 (Brier `r nb(r("qda")$brier_test)`), parce que l'hypothèse gaussienne est fausse pour des taux bornés et des comptages.
+
+```{r fig3, fig.cap = "(a) Courbes ROC sur le test : les modèles flexibles dominent partout. (b) Calibration : à cause de la dérive (figure 1b), presque tous les modèles sous-estiment le risque. Un modèle déployé devrait donc être recalibré régulièrement.", out.width = "95%"}
+fig("fig3_roc_calibration.png")
+```
+
+# Ce que les modèles ont appris
+
+Comme le GAM est additif, on peut lire l'effet de chaque variable (figure 4) :
+
+- **Heure déclarée tardive.** Un départ annoncé après 20 h ou avant 5 h est très peu fiable : sa cote est multipliée par 5 à 7. Ce sont des usagers qui « laissent la voiture pour la nuit » et repartent finalement le soir.
+- **Durée déclarée.** Le risque grimpe avec la durée annoncée : plus la promesse est longue, plus elle est souvent rompue.
+- **Passé de l'usager.** Le risque croît presque linéairement avec le taux passé de départs anticipés.
+
+Les deux méthodes de sélection concordent (figure 5). Le lasso élimine le site, l'énergie et la consommation déclarées, ainsi que l'écart moyen passé, sans perte d'AUC (`r nb(r("lasso")$auc_test)` contre `r nb(r("logistique")$auc_test)`). L'importance par permutation de la forêt place aussi en tête l'heure déclarée, le taux passé et la durée déclarée.
+
+```{r fig4, fig.cap = "Effets partiels du GAM, exprimés en facteur multiplicatif sur la cote (odds ratio, échelle log), avec une bande de ± 2 erreurs-types.", out.width = "100%"}
+fig("fig4_gam_effets.png")
+```
+
+```{r fig5, fig.cap = "Sélection de variables : le lasso garde 6 variables sur 10 (a) ; l'importance par permutation de la forêt (b) donne le même classement des variables dominantes.", out.width = "95%"}
+fig("fig5_variables.png")
+```
+
+# Investigation originale : la fiabilité s'apprend-elle ?
+
+**Question.** Les usagers deviennent-ils plus fiables avec l'expérience, et le modèle est-il utile pour les nouveaux venus ? Pour y répondre, nous découpons les sessions selon le nombre de sessions passées de l'usager (figure 6a). Pour séparer un vrai apprentissage d'un simple effet de sélection, où seuls les usagers fiables resteraient, nous suivons aussi les mêmes usagers, ceux qui ont au moins 40 sessions, au fil de leur rang de session (figure 6b).
+
+```{r fig6, fig.cap = "(a) Le taux de départ anticipé baisse avec l'ancienneté. (b) La baisse existe aussi chez un même usager : c'est un apprentissage, pas seulement une sélection. (c) Le modèle bat le taux historique à toutes les anciennetés, et reste informatif pour un usager sans historique.", out.width = "100%"}
+fig("fig6_anciennete.png")
+```
+
+**Résultats.**
+
+1. **Le taux baisse avec l'ancienneté :** de `r pc(anc$taux_anticipe[anc$anc=="0"])` \% à la première session à `r pc(anc$taux_anticipe[anc$anc=="50+"])` \% au-delà de 50 sessions.
+2. **C'est un vrai apprentissage.** Pour un même usager, le taux passe de `r pc(rang$taux_anticipe[1])` \% sur ses 5 premières sessions à `r pc(rang$taux_anticipe[nrow(rang)])` \% après la 41^e^ : l'effet ne vient donc pas seulement de la sélection des usagers fidèles.
+3. **Le modèle sert surtout là où l'historique est court.** Entre 1 et 4 sessions passées, il gagne `r nb(anc$auc_modele[anc$anc=="1-4"] - anc$auc_taux_usager[anc$anc=="1-4"], 2)` d'AUC sur le taux historique. Pour un usager totalement inconnu, il atteint encore `r nb(anc$auc_modele[anc$anc=="0"])` grâce aux seuls horaires déclarés. Ce dernier chiffre est fragile : il ne repose que sur `r anc$sessions_test[anc$anc=="0"]` sessions de test.
+
+**Seconde question : faut-il rééquilibrer les classes ?** Nous avons comparé trois variantes : sans rééquilibrage, avec des poids inverses aux fréquences, et avec un sous-échantillonnage. L'AUC ne change pas (logistique : `r nb(reeq$auc_test[1])` contre `r nb(reeq$auc_test[2])`). Seules les probabilités se déplacent : leur moyenne passe à `r pc(reeq$proba_moyenne_test[2])` \% pour un taux réel de `r pc(reeq$taux_observe_test[1])` \%, et le Brier se dégrade. Le gain de F1 au seuil naïf de 0,5 s'obtient aussi bien en réglant le seuil sur la validation. Comme l'ordonnanceur utilise la probabilité, **on ne rééquilibre pas**.
+
+# Utilisation dans le simulateur IA04
+
+Pour le simulateur, le GAM est exporté plutôt que le MLP : il ne lui cède que `r nb(r("mlp")$auc_test - r("gam")$auc_test)` d'AUC et se transcrit en Go sous forme de tables interpolées (fichier JSON).
+
+**Règle proposée :** échéance effective = heure déclarée $-\; p \times$ `r nb(gj$avance_mediane_si_anticipe_min, 0)` min. La valeur `r nb(gj$avance_mediane_si_anticipe_min, 0)` min est l'avance médiane observée quand l'usager part trop tôt. Sur le test, le MLP au seuil choisi en validation détecte `r ent(c_mlp$tp)` départs anticipés sur `r ent(c_mlp$tp + c_mlp$fn)`, au prix de `r ent(c_mlp$fp)` fausses alertes sur `r ent(c_mlp$fp + c_mlp$tn)` sessions fiables (figure 7).
+
+```{r fig7, fig.cap = "Distribution des probabilités prédites selon le comportement réel, et marge LLF correspondante (axe du haut).", out.width = "100%"}
+fig("fig7_marge_llf.png")
+```
+
+# Limites et perspectives
+
+- **Fuite possible par la saisie.** Nous utilisons la *dernière* heure saisie par l'usager. S'il la modifie pendant la session, une information postérieure à l'arrivée peut s'y glisser. L'API conserve l'historique des saisies (`modifiedAt`), donc il faudrait refaire l'étude avec la première saisie et mesurer l'écart d'AUC. C'est la priorité.
+- **Dérive.** Le taux de départ anticipé augmente au fil du temps, et les modèles sont sous-calibrés sur le test. Un réapprentissage glissant, ou au moins une recalibration de l'intercept, est nécessaire. De plus, la validation croisée aléatoire à l'intérieur du train ignore cette dimension temporelle.
+- **Champ de l'étude.** Seuls les usagers inscrits sur l'application, sur deux sites, sont couverts. Les SVM ont été réglés sur un sous-échantillon.
+- **Effet sur le simulateur non mesuré.** La marge n'a pas encore été évaluée dans le simulateur. L'étape suivante est de comparer l'énergie non livrée en LLF avec et sans marge.
+
+**Conclusion.** Une heure de départ déclarée n'est pas une échéance fiable : elle est rompue dans plus d'un quart des sessions, surtout quand elle est tardive, longue ou annoncée par un nouvel usager. Un modèle flexible mais simple, le GAM, prédit ces ruptures avec une AUC proche de 0,86. Il reste lisible et directement intégrable comme marge de sécurité dans l'ordonnanceur.
+
+\vspace{4pt}
+\footnotesize
+**Références.** Z. J. Lee, T. Li, S. H. Low, « ACN-Data: Analysis and Applications of an Open EV Charging Dataset », *ACM e-Energy*, 2019. Données : <https://ev.caltech.edu/dataset>. Code : branche `projet-3-fiabilite-depart` du dépôt du projet. Notebook reproductible : `reports/projet.Rmd`.
