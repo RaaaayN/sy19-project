@@ -4,6 +4,8 @@ SY19, UTC. Données ACN-Data (Caltech), sessions de recharge de véhicules élec
 Tout le code est en R ; chaque chiffre de ce rapport sort d'un script de `src/` et d'un fichier de `reports/metrics/`
 (indiqué entre parenthèses). Le notebook `reports/projet.Rmd` (rendu `reports/projet.html`) relit ces fichiers.
 
+**Version rendue de 5 pages, au format demandé par le sujet : [`reports/rapport_p3.pdf`](rapport_p3.pdf)** (source `reports/rapport_p3.Rmd`, figures `src/p3_figures_rapport.R`).
+
 ## 1. Question et lien avec IA04
 
 À son arrivée, l'usager déclare dans l'application ACN l'heure à laquelle il compte partir (`requestedDeparture`).
@@ -39,6 +41,8 @@ ordonnanceurs ACN et du simulateur est de quelques minutes, et à puissance typi
 d'énergie) ; (ii) le seuil 0 compterait comme « non fiables » des usagers qui partent à l'heure à la minute près,
 les déclarations étant arrondies ; (iii) au-delà (30, 60 min) la classe positive se réduit sans changer la
 nature du problème. Le seuil est un paramètre (`P3_SEUIL`) et le tableau ci-dessus permet d'en juger l'effet.
+
+![Écart départ réel - déclaré et dérive mensuelle](figures/rapport/fig1_probleme.png)
 
 **Variables, toutes connues à l'arrivée.** Site, heure d'arrivée, heure de départ déclarée, durée déclarée
 (`minutesAvailable`), week-end, `kWhRequested`, `WhPerMile`, et l'historique de l'usager : nombre de sessions
@@ -106,6 +110,8 @@ le risque croît avec la durée déclarée jusque vers 18 h ; il croît presque 
 il est plus élevé pour les nouveaux usagers. Le GAM gagne 0,025 d'AUC sur la logistique, seulement en
 assouplissant la forme des effets. Il est additif, donc exportable sous forme de tables (section 7).
 
+![Effets partiels du GAM en odds ratio](figures/rapport/fig4_gam_effets.png)
+
 ### 4.5 Arbre, bagging, random forest (`src/p3_trees.R`)
 Arbre CART élagué par CV 10 plis (règle 1-SE, cp = 0,00125, 29 feuilles, `p3_arbre.png`) : lisible mais
 instable et moins bon, AUC 0,801 / 0,811. Bagging (forêt avec mtry = 10, nodesize = 20 retenu par AUC OOB) :
@@ -113,6 +119,8 @@ instable et moins bon, AUC 0,801 / 0,811. Bagging (forêt avec mtry = 10, nodesi
 AUC OOB 0,841) : **0,848 / 0,861**, F1 0,674 / 0,707 avec la meilleure précision (0,751) et le meilleur Brier
 (0,138). La décorrélation des arbres (mtry petit) apporte nettement plus que le bagging seul. Importance
 (`p3_rf_importance.png`) : heure de départ déclarée et `past_rate` en tête, puis durée déclarée et `past_gap`.
+
+![Sélection de variables : lasso et importance de la forêt](figures/rapport/fig5_variables.png)
 
 ### 4.6 SVM linéaire et RBF (`src/p3_svm.R`)
 Pour libsvm (coût au moins quadratique en n), la grille est évaluée en CV 3 plis sur **8 000 sessions tirées
@@ -150,6 +158,10 @@ Trié par AUC de validation (`p3_comparaison.csv`). F1, précision et rappel au 
 | QDA | 0,794 | 0,811 [0,800 ; 0,822] | 0,606 | 0,649 | 0,589 | 0,722 | 0,201 |
 | taux historique usager | 0,747 | 0,762 [0,750 ; 0,775] | 0,543 | 0,606 | 0,522 | 0,722 | 0,184 |
 | classe majoritaire | 0,500 | 0,500 | 0 | 0 | 0 | 0 | 0,230 |
+
+![Comparaison des modèles : AUC test avec IC et score de Brier](figures/rapport/fig2_comparaison.png)
+
+![Courbes ROC et calibration sur le test](figures/rapport/fig3_roc_calibration.png)
 
 **Matrice de confusion du MLP sur le test** (`p3_confusion_test.csv`, seuil 0,291 issu de la validation) :
 
@@ -198,6 +210,8 @@ MLP, et additif, donc transportable sous forme de quelques tables sans dépendan
    conséquence est simple : l'heure d'un nouvel usager est la moins fiable et la plus difficile à prédire, il faut
    lui appliquer la marge par défaut.
 
+![Investigation : fiabilité et ancienneté](figures/rapport/fig6_anciennete.png)
+
 ### 6.2 Effet du rééquilibrage des classes
 (`p3_invest_reequilibrage.csv`) Logistique et forêt (mtry = 2) entraînées sans rééquilibrage, avec poids
 inverses aux fréquences, ou par sous-échantillonnage de la classe majoritaire.
@@ -238,6 +252,8 @@ gagne 0,006 d'AUC, dans l'IC.)
   diminuer et passe plus tôt dans la file. Une variante plus prudente utilise le 3e quartile de l'avance, ou une
   règle à seuil (marge seulement si p > 0,29, seuil F1 du MLP).
 
+![Probabilités prédites et marge LLF](figures/rapport/fig7_marge_llf.png)
+
 ## 8. Limites
 
 - `requestedDeparture` est la **dernière** saisie de l'usager (`src/data_acn.R`) ; si l'usager modifie son heure
@@ -261,4 +277,5 @@ Rscript src/p3_trees.R; Rscript src/p3_svm.R; Rscript src/p3_mlp.R
 Rscript src/p3_compare.R; Rscript src/p3_investigation.R
 Rscript src/p3_export.R && Rscript tests/test_depart_risk.R
 Rscript -e 'rmarkdown::render("reports/projet.Rmd")'
+Rscript src/p3_figures_rapport.R && Rscript -e 'rmarkdown::render("reports/rapport_p3.Rmd")'   # rapport PDF
 ```
