@@ -11,5 +11,5 @@
 - [x] 9. Investigation originale : sensibilité au seuil minimal de sessions et stabilité entre périodes
 - [x] 10. Générateur d'agents (GMM par profil), export JSON pour Go, test KS
 - [x] 11. rapport.md complet (tableau comparatif, limites, lien IA04)
-- [ ] 12. projet.Rmd rendu en HTML
+- [x] 12. projet.Rmd rendu en HTML
 - [ ] 13. Pull request vers main
